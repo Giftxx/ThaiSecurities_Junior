@@ -19,7 +19,7 @@
 | **Hybrid Search** | RRF (Reciprocal Rank Fusion) | รวมผล Vector 60% + BM25 40% |
 | **Backend** | FastAPI + Uvicorn | REST API server, port 8000 |
 | **Frontend** | HTML / CSS / JavaScript | Web UI ดูแบบ Chat interface |
-| **ภาษา** | Python 3.14+ | จัดการ dependency ด้วย uv |
+| **ภาษา** | Python 3.11+ | จัดการ dependency ด้วย uv |
 
 ---
 
@@ -30,7 +30,7 @@
 #### 0.1 ติดตั้ง Python
 
 1. เปิดเว็บ https://www.python.org/downloads/
-2. กดปุ่ม **Download Python 3.14.x** (หรือเวอร์ชันล่าสุด)
+2. กดปุ่ม **Download Python** (เวอร์ชัน 3.11 ขึ้นไป)
 3. **สำคัญมาก:** ตอนติดตั้ง ให้ **ติ๊กช่อง "Add Python to PATH"** ก่อนกด Install
 4. ติดตั้งเสร็จแล้ว เปิด **Terminal** (Windows: กด `Win+R` พิมพ์ `cmd` แล้ว Enter) แล้วพิมพ์:
    ```
@@ -144,16 +144,7 @@ Copy-Item .env.example .env
 cp .env.example .env
 ```
 
-จากนั้น **เปิดไฟล์ `.env`** ด้วย text editor (เช่น Notepad, VS Code) แล้ว **แก้ไขเนื้อหาเป็น:**
-
-```env
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_LLM_MODEL=qwen2.5:7b
-OLLAMA_EMBEDDING_MODEL=bge-m3
-OLLAMA_EMBEDDING_DIM=1024
-```
-
-> บรรทัดอื่นที่ไม่เกี่ยวกับ Ollama ลบออกได้ หรือปล่อยว่างก็ได้
+> ไฟล์ `.env.example` มีค่าถูกต้องพร้อมใช้แล้ว (Ollama + bge-m3 + qwen2.5:7b) — **ไม่ต้องแก้ไขอะไรเพิ่ม**
 
 ---
 

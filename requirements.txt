@@ -8,13 +8,18 @@ pydantic==2.12.5
 faiss-cpu==1.13.2
 numpy==2.4.4
 
-# Embeddings — dual mode (OpenAI API or TF-IDF+SVD, no torch required)
+# Hybrid search (BM25 keyword matching)
+rank-bm25>=0.2.2
+
+# Embeddings fallback (TF-IDF+SVD, used when no Ollama/API)
 scikit-learn==1.8.0
 scipy==1.17.1
 
-# LLM
+# LLM client (imported in rag_engine.py)
 openai==2.30.0
 
-# Web UI
-streamlit==1.56.0
+# Gemini API (optional, used when GEMINI_API_KEY is set)
+google-genai>=1.70.0
+
+# HTTP client
 requests==2.33.1
