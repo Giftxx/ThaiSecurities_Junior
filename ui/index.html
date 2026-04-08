@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Thai Securities Q&A</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+</head>
+<body>
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', t);
+        })();
+    </script>
+
+    <!-- ===== THEME TOGGLE (top-right) ===== -->
+    <button id="themeToggleBtn" title="Toggle theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+        <span id="themeLabel">Dark Mode</span>
+    </button>
+
+    <div class="container">
+        <!-- ===== SIDEBAR ===== -->
+        <div id="chatList">
+            <div class="sidebar-header">
+                <span class="sidebar-title">📈 Thai Securities Q&A</span>
+            </div>
+
+            <button id="newChatButton"><i class="fas fa-plus"></i> New Chat</button>
+
+            <div class="ns-selector-container">
+                <label for="nsSelector"><i class="fas fa-filter"></i> Namespace</label>
+                <select id="nsSelector">
+                    <option value="">Auto-detect</option>
+                </select>
+            </div>
+
+            <div class="topk-container">
+                <label for="topkRange"><i class="fas fa-layer-group"></i> Top-K: <span id="topkLabel">5</span></label>
+                <input type="range" id="topkRange" min="1" max="15" value="5">
+            </div>
+
+            <h3 id="chathishead"><i class="fas fa-history"></i> Chat History</h3>
+            <div id="chatListEle"></div>
+        </div>
+
+        <!-- ===== MAIN CHAT AREA ===== -->
+        <div id="chatbox">
+            <h1 class="header1">
+                <button id="toggleSidebarButton"><i class="fas fa-bars"></i></button>
+                Thai Securities Q&amp;A
+            </h1>
+
+            <div class="contain-overflow">
+                <div id="messages">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">📈</div>
+                        <h2>Thai Securities Q&A</h2>
+                        <p>Ask anything about Thai stocks, market data, SET regulations, and investment research.</p>
+                        <div class="welcome-tags">
+                            <span class="tag">Stock Ratings</span>
+                            <span class="tag">Market Reports</span>
+                            <span class="tag">Regulations</span>
+                            <span class="tag">Company Profiles</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div id="uploadedFiles" class="uploaded-files-strip" style="display:none;"></div>
+                    <div class="input-button-container">
+                        <div class="textarea-container">
+                            <textarea id="userInput" placeholder="Ask a question about Thai securities…" rows="1"></textarea>
+                        </div>
+                        <div class="inputButtonArea-container">
+                            <label for="fileInput" class="icon-btn" title="Attach file">
+                                <i class="fas fa-paperclip"></i>
+                            </label>
+                            <input type="file" id="fileInput" multiple
+                                accept=".txt,.md,.csv,.pdf,.py,.js,.ts,.json,.yaml,.yml,.xml,.html" style="display:none;">
+                            <button id="clearBtn" title="Clear chat">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <button id="sendButton" title="Send">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <button id="stopButton" style="display:none;" title="Stop">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="warning">Thai Securities RAG · offline TF-IDF mode · add OPENAI_API_KEY for AI answers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="script.js"></script>
+</body>
+</html>
