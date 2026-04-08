@@ -25,8 +25,6 @@
 
 ## 🚀 วิธีติดตั้งและรันโปรเจค (ทีละขั้นตอน)
 
-> **สำหรับคนที่ไม่เคย coding มาก่อน** — ทำตามทีละขั้น
-
 ### ขั้นตอนที่ 0 — ติดตั้งโปรแกรมที่ต้องใช้
 
 #### 0.1 ติดตั้ง Python
@@ -82,7 +80,7 @@ uv --version
 เปิด Terminal แล้วพิมพ์:
 
 ```bash
-git clone <URL ของ repository>
+git clone https://github.com/Giftxx/ThaiSecurities_Junior.git
 cd ysth-junior-ai-engineer-test-mar2026
 ```
 
