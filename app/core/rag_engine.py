@@ -110,6 +110,14 @@ def _is_greeting(text: str) -> bool:
     return bool(_GREETING_PATTERNS.match(text.strip()))
 
 
+def _detect_language(text: str) -> str:
+    """Return 'th' if text contains Thai characters, else 'en'."""
+    for ch in text:
+        if '\u0e01' <= ch <= '\u0e5b':
+            return "th"
+    return "en"
+
+
 # ---------------------------------------------------------------------------
 # Context builder
 # ---------------------------------------------------------------------------
@@ -191,25 +199,28 @@ or in English:
 Do NOT make up any figures, recommendations, or facts.
 """
 
-_USER_PROMPT_TEMPLATE = """Context passages:
+_USER_PROMPT_TEMPLATE = """{lang_directive}
+
+Context passages:
 {context}
 
 ---
 User question: {question}
 
 Instructions:
-1. **LANGUAGE RULE (MOST IMPORTANT)**: If the question is in Thai, your ENTIRE answer MUST be in Thai. If in English, answer in English. Do NOT answer in English or Chinese when the question is in Thai. NEVER use Chinese characters (中文) like 收入, 净利润, 每股收益 — always use Thai terms instead.
-2. Give a **comprehensive and detailed** answer — do not be brief.
-3. Cite sources with [1], [2], … for every factual claim.
-4. Include ALL relevant supporting data from context: financial metrics, ratios, growth rates, risks, analyst opinions, etc.
-5. You MUST use Markdown tables when the context contains numerical data across years or multiple items. Example:
+1. Give a **comprehensive and detailed** answer — do not be brief.
+2. Cite sources with [1], [2], … for every factual claim.
+3. Include ALL relevant supporting data from context: financial metrics, ratios, growth rates, risks, analyst opinions, etc.
+4. You MUST use Markdown tables when the context contains numerical data across years or multiple items. Example:
 
 | Metric | 2024A | 2025E | 2026E |
 |--------|-------|-------|-------|
 | Revenue | 100 | 110 | 120 |
 
-6. Also use **bold**, bullet points (- ), and headings (##) for readability.
-7. If the context is insufficient, say so clearly without fabricating.
+5. Also use **bold**, bullet points (- ), and headings (##) for readability.
+6. If the context is insufficient, say so clearly without fabricating.
+
+Remember: {lang_reminder}
 
 Answer:"""
 
@@ -409,11 +420,19 @@ class RAGEngine:
         """
         # Step 0 — greeting detection (skip retrieval entirely)
         if _is_greeting(question):
-            greeting_resp = (
-                "สวัสดีค่ะ! ฉันเป็นผู้ช่วยตอบคำถามเกี่ยวกับข้อมูลตลาดหุ้นไทย "
-                "สามารถช่วยตอบเรื่องคำแนะนำการลงทุน ราคาเป้าหมาย ผลการดำเนินงานของบริษัท "
-                "รายงานตลาด และกฎระเบียบการซื้อขายได้ค่ะ มีอะไรให้ช่วยไหมคะ?"
-            )
+            lang = _detect_language(question)
+            if lang == "th":
+                greeting_resp = (
+                    "สวัสดีค่ะ! ฉันเป็นผู้ช่วยตอบคำถามเกี่ยวกับข้อมูลตลาดหุ้นไทย "
+                    "สามารถช่วยตอบเรื่องคำแนะนำการลงทุน ราคาเป้าหมาย ผลการดำเนินงานของบริษัท "
+                    "รายงานตลาด และกฎระเบียบการซื้อขายได้ค่ะ มีอะไรให้ช่วยไหมคะ?"
+                )
+            else:
+                greeting_resp = (
+                    "Hello! I'm a research assistant for Thai Securities. "
+                    "I can help with stock recommendations, target prices, company profiles, "
+                    "market reports, and trading regulations. How can I help you?"
+                )
             return QueryResult(
                 answer=greeting_resp,
                 sources=[],
@@ -494,9 +513,18 @@ class RAGEngine:
         if self._ollama_llm:
             import urllib.request
             import json as _json
-            prompt = _USER_PROMPT_TEMPLATE.format(context=context, question=question)
+            lang = _detect_language(question)
+            if lang == "th":
+                lang_directive = "## คำสั่งบังคับ: ตอบเป็นภาษาไทยทั้งหมดเท่านั้น ห้ามตอบเป็นภาษาอังกฤษหรือภาษาจีน"
+                lang_reminder = "ตอบเป็นภาษาไทยเท่านั้น (Thai only)"
+                sys_lang_prefix = "CRITICAL INSTRUCTION: The user is writing in Thai. You MUST answer ENTIRELY in Thai (ภาษาไทย). Do NOT answer in English or Chinese.\n\n"
+            else:
+                lang_directive = "## MANDATORY: Answer entirely in English. Do NOT answer in Thai or Chinese."
+                lang_reminder = "Answer in English only"
+                sys_lang_prefix = "CRITICAL INSTRUCTION: The user is writing in English. You MUST answer ENTIRELY in English. Do NOT answer in Thai or Chinese.\n\n"
+            prompt = _USER_PROMPT_TEMPLATE.format(context=context, question=question, lang_directive=lang_directive, lang_reminder=lang_reminder)
             messages = [
-                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "system", "content": sys_lang_prefix + _SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
             ]
             body = _json.dumps({
@@ -521,8 +549,17 @@ class RAGEngine:
         # ── Gemini (priority 1) ──────────────────────────────────────────────
         if self._gemini is not None:
             import time as _time
-            prompt = _USER_PROMPT_TEMPLATE.format(context=context, question=question)
-            full_prompt = _SYSTEM_PROMPT + "\n\n" + prompt
+            lang = _detect_language(question)
+            if lang == "th":
+                lang_directive = "## คำสั่งบังคับ: ตอบเป็นภาษาไทยทั้งหมดเท่านั้น ห้ามตอบเป็นภาษาอังกฤษหรือภาษาจีน"
+                lang_reminder = "ตอบเป็นภาษาไทยเท่านั้น (Thai only)"
+                sys_lang_prefix = "CRITICAL INSTRUCTION: The user is writing in Thai. You MUST answer ENTIRELY in Thai (ภาษาไทย). Do NOT answer in English or Chinese.\n\n"
+            else:
+                lang_directive = "## MANDATORY: Answer entirely in English. Do NOT answer in Thai or Chinese."
+                lang_reminder = "Answer in English only"
+                sys_lang_prefix = "CRITICAL INSTRUCTION: The user is writing in English. You MUST answer ENTIRELY in English. Do NOT answer in Thai or Chinese.\n\n"
+            prompt = _USER_PROMPT_TEMPLATE.format(context=context, question=question, lang_directive=lang_directive, lang_reminder=lang_reminder)
+            full_prompt = sys_lang_prefix + _SYSTEM_PROMPT + "\n\n" + prompt
             for attempt in range(3):
                 try:
                     response = self._gemini.models.generate_content(
@@ -545,6 +582,13 @@ class RAGEngine:
             return self._fallback_answer(question, context)
 
         try:
+            lang = _detect_language(question)
+            if lang == "th":
+                lang_directive = "## คำสั่งบังคับ: ตอบเป็นภาษาไทยทั้งหมดเท่านั้น ห้ามตอบเป็นภาษาอังกฤษหรือภาษาจีน"
+                lang_reminder = "ตอบเป็นภาษาไทยเท่านั้น (Thai only)"
+            else:
+                lang_directive = "## MANDATORY: Answer entirely in English. Do NOT answer in Thai or Chinese."
+                lang_reminder = "Answer in English only"
             response = self._client.chat.completions.create(
                 model=LLM_MODEL,
                 temperature=LLM_TEMPERATURE,
@@ -554,7 +598,8 @@ class RAGEngine:
                     {
                         "role": "user",
                         "content": _USER_PROMPT_TEMPLATE.format(
-                            context=context, question=question
+                            context=context, question=question,
+                            lang_directive=lang_directive, lang_reminder=lang_reminder,
                         ),
                     },
                 ],
